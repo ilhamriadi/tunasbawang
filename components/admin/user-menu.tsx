@@ -33,17 +33,15 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <button className="flex items-center gap-2 rounded-lg px-1.5 py-1 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring">
-            <Avatar className="size-7">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-            <span className="hidden text-sm font-medium sm:block">{name ?? email ?? 'Admin'}</span>
-            <ChevronUp className="hidden size-3.5 text-muted-foreground sm:block" />
-          </button>
-        }
-      />
+      <DropdownMenuTrigger>
+        <button className="flex items-center gap-2 rounded-lg px-1.5 py-1 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring">
+          <Avatar className="size-7">
+            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+          </Avatar>
+          <span className="hidden text-sm font-medium sm:block">{name ?? email ?? 'Admin'}</span>
+          <ChevronUp className="hidden size-3.5 text-muted-foreground sm:block" />
+        </button>
+      </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col">
