@@ -21,14 +21,14 @@ const checkoutSchema = z.object({
   }),
   items: z.array(checkoutItemSchema).min(1),
   subtotal: z.number().int().min(0),
-  shippingCost: z.number().int().min(0),
+  shipping_cost: z.number().int().min(0),
   total: z.number().int().min(0),
-  shippingName: z.string(),
-  paymentName: z.string(),
+  shipping_name: z.string(),
+  payment_name: z.string(),
 })
 
 export type CheckoutResult =
-  | { ok: true; orderId: string; orderNumber: string }
+  | { ok: true; orderId: string; order_number: string }
   | { ok: false; error: string }
 
 /**
@@ -39,9 +39,10 @@ export type CheckoutResult =
 export async function placeOrderAction(input: unknown): Promise<CheckoutResult> {
   const parsed = checkoutSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: 'Data pesanan tidak valid.' }
+    console.error('Checkout validation failed', parsed.error);
+    return { ok: false, error: 'Data pesanan tidak valid: ' + parsed.error.message };
   }
-  const payload = parsed.data
+  const payload = parsed.data; console.log('payload before validation:', payload);
 
   try {
     const supabase = await createClient()
@@ -50,7 +51,7 @@ export async function placeOrderAction(input: unknown): Promise<CheckoutResult> 
       // Surface the RPC's raised exception (e.g. "Stok ... tidak mencukupi").
       return { ok: false, error: error.message }
     }
-    return { ok: true, orderId: data as string, orderNumber: payload.order_number }
+    return { ok: true, orderId: data as string, order_number: payload.order_number }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'Gagal membuat pesanan.' }
   }

@@ -71,7 +71,7 @@ export function CheckoutView() {
       return
     }
     setPlaced({
-      number: res.orderNumber,
+      number: res.order_number,
       createdAt: new Date().toISOString(),
       customer,
       lines: lines.map((l) => ({
