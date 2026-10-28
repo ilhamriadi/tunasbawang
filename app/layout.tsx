@@ -1,11 +1,8 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Archivo_Black, Space_Grotesk } from 'next/font/google'
-import { SiteHeader } from '@/components/site/site-header'
-import { SiteFooter } from '@/components/site/site-footer'
-import { AnnouncementBar } from '@/components/site/announcement-bar'
-import { CartProvider } from '@/lib/cart'
 import './globals.css'
+import './admin.css'
 
 const archivoBlack = Archivo_Black({
   weight: '400',
@@ -27,7 +24,6 @@ export const metadata: Metadata = {
   },
   description:
     'Toko online Tunas Bawang dari Enrekang, Sulawesi Selatan. Jual bawang merah segar, bibit unggul, pupuk, dan alat pertanian langsung dari petani.',
-  generator: 'v0.app',
   icons: {
     icon: [
       { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },
@@ -49,16 +45,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="id" className={`${archivoBlack.variable} ${spaceGrotesk.variable}`}>
-      <body className="min-h-dvh antialiased">
-        <CartProvider>
-          <AnnouncementBar />
-          <SiteHeader />
-          <main id="konten">{children}</main>
-          <SiteFooter />
-        </CartProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
-      </body>
+    <html
+      lang="id"
+      suppressHydrationWarning
+      className={`${archivoBlack.variable} ${spaceGrotesk.variable}`}
+    >
+      <body className="min-h-dvh antialiased">{children}</body>
+      {process.env.NODE_ENV === 'production' && <Analytics />}
     </html>
   )
 }

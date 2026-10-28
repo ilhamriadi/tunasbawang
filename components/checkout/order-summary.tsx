@@ -9,12 +9,14 @@ export function OrderSummary({
   shippingName,
   shippingCost,
   total,
+  submitting = false,
 }: {
   lines: ResolvedCartLine[]
   subtotal: number
   shippingName: string
   shippingCost: number
   total: number
+  submitting?: boolean
 }) {
   const remainingForFree = FREE_SHIPPING_MIN - subtotal
   const progress = Math.min(100, (subtotal / FREE_SHIPPING_MIN) * 100)
@@ -66,9 +68,10 @@ export function OrderSummary({
           <button
             type="submit"
             form="checkout-form"
-            className="brutal-press w-full border-3 border-foreground bg-primary px-6 py-4 font-display text-lg text-primary-foreground uppercase shadow-brutal"
+            disabled={submitting}
+            className="brutal-press w-full border-3 border-foreground bg-primary px-6 py-4 font-display text-lg text-primary-foreground uppercase shadow-brutal disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Buat Pesanan
+            {submitting ? 'Memproses…' : 'Buat Pesanan'}
           </button>
           <p className="mt-3 text-center text-xs text-muted-foreground">
             Dengan membuat pesanan, Anda menyetujui syarat & ketentuan Tunas Bawang.

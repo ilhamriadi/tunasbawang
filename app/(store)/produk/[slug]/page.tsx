@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PackageCheck, ShieldCheck, Star, Truck } from 'lucide-react'
-import { getCategory, products } from '@/lib/products'
+import { getStorefrontCategories, getStorefrontProducts } from '@/lib/data/storefront'
 import { formatCompact, formatRupiah } from '@/lib/format'
 import { FREE_SHIPPING_MIN } from '@/lib/checkout'
 import { PurchasePanel } from '@/components/product/purchase-panel'
@@ -12,12 +12,9 @@ import { StockIndicator } from '@/components/product/stock-indicator'
 
 type Params = Promise<{ slug: string }>
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }))
-}
-
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params
+  const products = await getStorefrontProducts()
   const product = products.find((p) => p.slug === slug)
   if (!product) return { title: 'Produk tidak ditemukan' }
   return {
@@ -29,10 +26,14 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function ProductDetailPage({ params }: { params: Params }) {
   const { slug } = await params
+  const [products, categories] = await Promise.all([
+    getStorefrontProducts(),
+    getStorefrontCategories(),
+  ])
   const product = products.find((p) => p.slug === slug)
   if (!product) notFound()
 
-  const category = getCategory(product.category)
+  const category = categories.find((c) => c.slug === product.category)
   const related = products.filter((p) => p.category === product.category && p.slug !== product.slug).slice(0, 4)
 
   const specs = [

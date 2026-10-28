@@ -9,6 +9,7 @@ import { CartItem } from '@/components/cart/cart-item'
 import { CheckoutForm, type CustomerDetails } from './checkout-form'
 import { OrderSummary } from './order-summary'
 import { OrderSuccess, type PlacedOrder } from './order-success'
+import { placeOrderAction } from '@/lib/actions/checkout'
 
 function createOrderNumber() {
   const now = new Date()
@@ -22,6 +23,8 @@ export function CheckoutView() {
   const [shippingId, setShippingId] = useState<ShippingId>('reguler')
   const [paymentId, setPaymentId] = useState<PaymentId>('transfer')
   const [placed, setPlaced] = useState<PlacedOrder | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const shipping = shippingMethods.find((m) => m.id === shippingId) ?? shippingMethods[0]
   const payment = paymentMethods.find((m) => m.id === paymentId) ?? paymentMethods[0]
@@ -48,9 +51,27 @@ export function CheckoutView() {
     )
   }
 
-  function handleSubmit(customer: CustomerDetails) {
+  async function handleSubmit(customer: CustomerDetails) {
+    setSubmitting(true)
+    setSubmitError(null)
+    const orderNumber = createOrderNumber()
+    const res = await placeOrderAction({
+      orderNumber,
+      customer,
+      items: lines.map((l) => ({ slug: l.slug, option: l.option, quantity: l.quantity })),
+      subtotal,
+      shippingCost: ongkir,
+      total,
+      shippingName: shipping.name,
+      paymentName: payment.name,
+    })
+    setSubmitting(false)
+    if (!res.ok) {
+      setSubmitError(res.error)
+      return
+    }
     setPlaced({
-      number: createOrderNumber(),
+      number: res.orderNumber,
       createdAt: new Date().toISOString(),
       customer,
       lines: lines.map((l) => ({
@@ -71,6 +92,11 @@ export function CheckoutView() {
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_24rem] lg:gap-10">
       <div className="flex flex-col gap-8">
+        {submitError && (
+          <div className="border-3 border-foreground bg-destructive/10 px-4 py-3 text-sm font-bold text-destructive">
+            {submitError}
+          </div>
+        )}
         <section aria-labelledby="ringkasan-barang" className="border-3 border-foreground bg-card shadow-brutal">
           <h2
             id="ringkasan-barang"
@@ -107,6 +133,7 @@ export function CheckoutView() {
         shippingName={shipping.name}
         shippingCost={ongkir}
         total={total}
+        submitting={submitting}
       />
     </div>
   )

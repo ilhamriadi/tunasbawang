@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
-import { categories, countByCategory, type Category } from '@/lib/products'
+import type { Category, Product } from '@/lib/products'
 import { cn } from '@/lib/utils'
 import { SectionHeading } from './section-heading'
 
@@ -12,7 +12,15 @@ const toneStyles: Record<Category['tone'], string> = {
   foreground: 'bg-foreground text-background',
 }
 
-export function CategoryGrid() {
+export function CategoryGrid({
+  categories,
+  products,
+}: {
+  categories: Category[]
+  products: Product[]
+}) {
+  const countFor = (slug: string) => products.filter((p) => p.category === slug).length
+
   return (
     <section aria-labelledby="kategori-judul" className="mx-auto max-w-7xl px-4 py-14">
       <SectionHeading id="kategori-judul" eyebrow="Kategori" title="Mau belanja apa hari ini?" />
@@ -33,7 +41,7 @@ export function CategoryGrid() {
                 <div>
                   <h3 className="font-display text-lg leading-tight uppercase md:text-2xl">{c.name}</h3>
                   <p className="mt-1 hidden text-sm font-medium opacity-80 sm:block">{c.tagline}</p>
-                  <p className="mt-1 text-xs font-bold uppercase">{`${countByCategory(c.slug)} produk`}</p>
+                  <p className="mt-1 text-xs font-bold uppercase">{`${countFor(c.slug)} produk`}</p>
                 </div>
                 <ArrowUpRight className="size-6 shrink-0" strokeWidth={3} aria-hidden="true" />
               </div>

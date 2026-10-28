@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { categories, sortOptions, type CategorySlug, type SortOption } from '@/lib/products'
+import { sortOptions, type CategorySlug, type SortOption } from '@/lib/products'
 import { cn } from '@/lib/utils'
 
 type FilterState = { kategori?: CategorySlug; q?: string; sort: SortOption }
@@ -17,7 +17,13 @@ function buildHref(state: FilterState, patch: Partial<FilterState>) {
 const chipBase =
   'inline-flex shrink-0 items-center whitespace-nowrap border-3 border-foreground px-3 py-1.5 text-sm font-bold uppercase'
 
-export function CategoryFilter({ state }: { state: FilterState }) {
+export function CategoryFilter({
+  state,
+  categories,
+}: {
+  state: FilterState
+  categories: { slug: CategorySlug; name: string }[]
+}) {
   const items = [{ slug: undefined, name: 'Semua' }, ...categories]
   return (
     <nav aria-label="Filter kategori">

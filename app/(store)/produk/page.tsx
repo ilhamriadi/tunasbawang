@@ -1,15 +1,33 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SearchX } from 'lucide-react'
-import { getCategory, isCategorySlug, isSortOption, queryProducts } from '@/lib/products'
+import { getStorefrontCategories, getStorefrontProducts } from '@/lib/data/storefront'
+import type { CategorySlug, Product, SortOption } from '@/lib/products'
 import { ProductCard } from '@/components/product/product-card'
 import { CategoryFilter, SortFilter, buildHref } from '@/components/product/product-filters'
 
 type SearchParams = Promise<{ kategori?: string; q?: string; sort?: string }>
 
+const SORT_KEYS: SortOption[] = ['terbaru', 'terlaris', 'termurah', 'termahal']
+
+function sortProducts(list: Product[], sort: SortOption): Product[] {
+  const copy = [...list]
+  switch (sort) {
+    case 'terlaris':
+      return copy.sort((a, b) => b.sold - a.sold)
+    case 'termurah':
+      return copy.sort((a, b) => a.price - b.price)
+    case 'termahal':
+      return copy.sort((a, b) => b.price - a.price)
+    default:
+      return copy.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  }
+}
+
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
   const { kategori } = await searchParams
-  const category = isCategorySlug(kategori) ? getCategory(kategori) : undefined
+  const categories = await getStorefrontCategories()
+  const category = categories.find((c) => c.slug === kategori)
   return {
     title: category ? category.name : 'Semua Produk',
     description: category
@@ -20,13 +38,32 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
 
 export default async function ProdukPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
-  const kategori = isCategorySlug(params.kategori) ? params.kategori : undefined
-  const sort = isSortOption(params.sort) ? params.sort : 'terbaru'
-  const q = params.q?.trim().slice(0, 80) || undefined
-  const state = { kategori, q, sort }
+  const [categories, products] = await Promise.all([
+    getStorefrontCategories(),
+    getStorefrontProducts(),
+  ])
 
-  const results = queryProducts({ category: kategori, q, sort })
-  const category = kategori ? getCategory(kategori) : undefined
+  const kategori = categories.some((c) => c.slug === params.kategori)
+    ? (params.kategori as CategorySlug)
+    : undefined
+  const sort = SORT_KEYS.includes(params.sort as SortOption)
+    ? (params.sort as SortOption)
+    : 'terbaru'
+  const q = params.q?.trim().slice(0, 80) || undefined
+
+  let results = products
+  if (kategori) results = results.filter((p) => p.category === kategori)
+  if (q) {
+    const term = q.toLowerCase()
+    results = results.filter((p) => {
+      const catName = categories.find((c) => c.slug === p.category)?.name ?? ''
+      return `${p.name} ${p.description} ${catName}`.toLowerCase().includes(term)
+    })
+  }
+  results = sortProducts(results, sort)
+
+  const category = kategori ? categories.find((c) => c.slug === kategori) : undefined
+  const state = { kategori, q, sort }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
@@ -76,7 +113,7 @@ export default async function ProdukPage({ searchParams }: { searchParams: Searc
       </header>
 
       <div className="flex flex-col gap-4 py-6 lg:flex-row lg:items-center lg:justify-between">
-        <CategoryFilter state={state} />
+        <CategoryFilter state={state} categories={categories.map((c) => ({ slug: c.slug, name: c.name }))} />
         <SortFilter state={state} />
       </div>
 

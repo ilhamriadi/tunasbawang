@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { getFeaturedProducts } from '@/lib/products'
 import { ProductCard } from '@/components/product/product-card'
 import { SectionHeading } from './section-heading'
+import type { Product } from '@/lib/products'
 
-export function FeaturedProducts() {
-  const featured = getFeaturedProducts().slice(0, 8)
+export function FeaturedProducts({ products }: { products: Product[] }) {
+  const featured = products.filter((p) => p.featured).slice(0, 8)
 
   return (
     <section aria-labelledby="unggulan-judul" className="border-y-3 border-foreground bg-muted">
