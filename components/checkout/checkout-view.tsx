@@ -56,14 +56,14 @@ export function CheckoutView() {
     setSubmitError(null)
     const orderNumber = createOrderNumber()
     const res = await placeOrderAction({
-      orderNumber,
+      order_number: orderNumber,
       customer,
       items: lines.map((l) => ({ slug: l.slug, option: l.option, quantity: l.quantity })),
       subtotal,
-      shippingCost: ongkir,
+      shipping_cost: ongkir,
       total,
-      shippingName: shipping.name,
-      paymentName: payment.name,
+      shipping_name: shipping.name,
+      payment_name: payment.name,
     })
     setSubmitting(false)
     if (!res.ok) {

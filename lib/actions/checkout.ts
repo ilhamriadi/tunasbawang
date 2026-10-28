@@ -10,7 +10,7 @@ const checkoutItemSchema = z.object({
 })
 
 const checkoutSchema = z.object({
-  orderNumber: z.string().min(3),
+  order_number: z.string().min(3),
   customer: z.object({
     name: z.string().min(1),
     phone: z.string().min(1),
@@ -50,7 +50,7 @@ export async function placeOrderAction(input: unknown): Promise<CheckoutResult> 
       // Surface the RPC's raised exception (e.g. "Stok ... tidak mencukupi").
       return { ok: false, error: error.message }
     }
-    return { ok: true, orderId: data as string, orderNumber: payload.orderNumber }
+    return { ok: true, orderId: data as string, orderNumber: payload.order_number }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'Gagal membuat pesanan.' }
   }
