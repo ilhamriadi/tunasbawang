@@ -17,23 +17,26 @@ function isConfigured() {
 }
 
 export async function getStorefrontCategories(): Promise<Category[]> {
-  if (!isConfigured()) return fallbackCategories
+  const order = ['bawang-merah', 'bibit', 'pupuk', 'alat-tani'] as const;
+  if (!isConfigured()) return fallbackCategories;
   try {
-    const supabase = await createClient()
+    const supabase = await createClient();
     const { data, error } = await supabase
       .from('categories')
-      .select('slug, name, tagline, image, tone')
-      .order('name', { ascending: true })
-    if (error || !data?.length) return fallbackCategories
-    return data.map((c) => ({
+      .select('slug, name, tagline, image, tone');
+    if (error || !data?.length) return fallbackCategories;
+    // Preserve custom order defined above
+    const dataMap = new Map(data.map((c: any) => [c.slug, c]));
+    const ordered = order.map((slug) => dataMap.get(slug)).filter(Boolean) as any[];
+    return ordered.map((c) => ({
       slug: c.slug as CategorySlug,
       name: c.name,
       tagline: c.tagline ?? '',
       image: c.image ?? '',
       tone: (c.tone as Category['tone']) ?? 'primary',
-    }))
+    }));
   } catch {
-    return fallbackCategories
+    return fallbackCategories;
   }
 }
 
